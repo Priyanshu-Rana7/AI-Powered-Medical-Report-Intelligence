@@ -2,15 +2,23 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import ReactMarkdown from 'react-markdown';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Heart, Activity, Shield, Brain } from 'lucide-react';
+import { Heart, Activity, Shield, Brain, CheckCircle, AlertTriangle } from 'lucide-react';
 import FileUpload from './components/FileUpload';
 
 const API_BASE_URL = 'http://localhost:8000';
 
 function App() {
   const [analysis, setAnalysis] = useState(null);
+  const [rawText, setRawText] = useState('');
   const [isUploading, setIsUploading] = useState(false);
+  const [isTranslating, setIsTranslating] = useState(false);
   const [error, setError] = useState(null);
+  const [selectedLanguage, setSelectedLanguage] = useState('English');
+
+  const languages = [
+    'English', 'Hindi', 'Odia', 'Bengali', 'Tamil', 'Telugu',
+    'Marathi', 'Gujarati', 'Kannada', 'Malayalam', 'Punjabi'
+  ];
 
   const handleFileUpload = async (file) => {
     setIsUploading(true);
@@ -19,6 +27,7 @@ function App() {
 
     const formData = new FormData();
     formData.append('file', file);
+    formData.append('language', selectedLanguage);
 
     try {
       const response = await axios.post(`${API_BASE_URL}/upload`, formData, {
@@ -27,6 +36,7 @@ function App() {
         },
       });
       setAnalysis(response.data.analysis);
+      setRawText(response.data.raw_text);
     } catch (err) {
       console.error('Upload error:', err);
       setError(err.response?.data?.detail || 'An error occurred during analysis. Please try again.');
@@ -35,8 +45,29 @@ function App() {
     }
   };
 
+  const handleLanguageChange = async (newLang) => {
+    setSelectedLanguage(newLang);
+    if (!analysis) return;
+
+    setIsTranslating(true);
+    try {
+      const response = await axios.post(`${API_BASE_URL}/translate`, {
+        text: analysis,
+        raw_text: rawText,
+        language: newLang
+      });
+      setAnalysis(response.data.analysis);
+    } catch (err) {
+      console.error('Translation error:', err);
+      setError('Could not translate the report. Please try again.');
+    } finally {
+      setIsTranslating(false);
+    }
+  };
+
   const reset = () => {
     setAnalysis(null);
+    setRawText('');
     setError(null);
   };
 
@@ -52,7 +83,7 @@ function App() {
             <div className="bg-blue-500 p-2 rounded-xl">
               <Activity className="text-white w-6 h-6" />
             </div>
-            <span className="text-2xl font-bold tracking-tight">MedIntel AI</span>
+            <span className="text-2xl font-bold tracking-tight">MedClare</span>
           </div>
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-text-secondary">
             <a href="#" className="hover:text-white transition-colors">How it works</a>
@@ -79,7 +110,7 @@ function App() {
                   Understand your <br />
                   <span className="gradient-text">Medical Reports</span> in Seconds
                 </h1>
-                <p className="text-xl text-text-secondary mb-12 max-w-2xl mx-auto">
+                <p className="text-xl text-text-secondary mb-8 max-w-2xl mx-auto">
                   Upload your complex medical results and get a personalized, empathetic, and simplified explanation tailored for you.
                 </p>
 
@@ -124,18 +155,73 @@ function App() {
                 key="result"
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="glass-card p-8 md:p-12 mb-20"
+                className="glass-card p-8 md:p-12 mb-20 relative"
               >
-                <div className="prose prose-invert max-w-none prose-headings:font-bold prose-h1:text-4xl prose-h2:text-2xl prose-h2:mt-8 prose-h2:mb-4 prose-p:text-text-secondary prose-li:text-text-secondary">
-                  <ReactMarkdown>{analysis}</ReactMarkdown>
+                {isTranslating && (
+                  <div className="absolute inset-0 bg-bg-color/50 backdrop-blur-sm z-50 flex items-center justify-center rounded-2xl">
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="relative">
+                        <div className="w-12 h-12 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>
+                        <Brain className="absolute inset-0 m-auto w-5 h-5 text-blue-500" />
+                      </div>
+                      <p className="text-blue-500 font-medium text-sm">Translating...</p>
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
+                  <div className="verified-badge !mb-0">
+                    <CheckCircle className="w-4 h-4" />
+                    <span>Clinically Verified by Dual-AI Pass</span>
+                  </div>
+
+                  <div className="flex items-center gap-3 glass-card px-4 py-2 border-glass-border">
+                    <span className="text-xs font-medium text-text-secondary uppercase tracking-wider">Language:</span>
+                    <select
+                      value={selectedLanguage}
+                      onChange={(e) => handleLanguageChange(e.target.value)}
+                      className="bg-transparent text-white text-sm font-semibold focus:outline-none cursor-pointer"
+                    >
+                      {languages.map(lang => (
+                        <option key={lang} value={lang} className="bg-[#05070a]">{lang}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
 
-                <div className="mt-12 pt-8 border-t border-glass-border flex flex-col md:flex-row items-center justify-between gap-6">
+                <div className="prose prose-invert max-w-none prose-headings:font-bold prose-h1:text-4xl prose-h2:text-2xl prose-h2:mt-8 prose-h2:mb-4 prose-p:text-text-secondary prose-li:text-text-secondary">
+                  <ReactMarkdown
+                    components={{
+                      text: ({ value }) => {
+                        if (value.includes('!!!UNCLEAR:')) {
+                          const parts = value.split(/(!!!UNCLEAR:.*?!!!)/g);
+                          return parts.map((part, i) => {
+                            if (part.startsWith('!!!UNCLEAR:')) {
+                              const term = part.replace('!!!UNCLEAR:', '').replace('!!!', '');
+                              return (
+                                <span key={i} className="unclear-highlight" title="Our AI verifier flagged this as potentially unclear or missing in the report. Please ask your doctor specifically about this term.">
+                                  <AlertTriangle className="inline w-3 h-3 mr-1" />
+                                  {term} (Unclear)
+                                </span>
+                              );
+                            }
+                            return part;
+                          });
+                        }
+                        return value;
+                      }
+                    }}
+                  >
+                    {analysis}
+                  </ReactMarkdown>
+                </div>
+
+                <div className="mt-12 pt-8 flex flex-col md:flex-row items-center justify-between gap-6">
                   <button className="btn-primary" onClick={() => window.print()}>
                     Download Analysis
                   </button>
                   <button
-                    className="text-text-secondary hover:text-white transition-colors"
+                    className="btn-secondary"
                     onClick={reset}
                   >
                     Analyze another report
@@ -147,7 +233,7 @@ function App() {
         </main>
 
         <footer className="mt-10 mb-20 text-center text-text-secondary text-sm">
-          <p>© 2026 MedIntel AI. Built for clarity and care.</p>
+          <p>© 2026 MedClare. Built for clarity and care.</p>
         </footer>
       </div>
     </div>

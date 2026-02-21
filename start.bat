@@ -1,11 +1,11 @@
 @echo off
-echo Starting MedIntel AI System...
+echo Starting MedClare AI System...
 
 :: Start Backend in a new window
-start "MedIntel Backend" /d "%~dp0backend" cmd /k "call .\venv\Scripts\activate && python main.py"
+start "MedClare Backend" /d "%~dp0backend" cmd /k "call .\venv\Scripts\activate && python main.py"
 
 :: Start Frontend in a new window
-start "MedIntel Frontend" /d "%~dp0frontend" cmd /k "npm run dev"
+start "MedClare Frontend" /d "%~dp0frontend" cmd /k "npm run dev"
 
 echo.
 echo Both servers are starting...

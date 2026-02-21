@@ -64,6 +64,23 @@ h4 {
   opacity: 0.9;
 }
 
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  padding: 12px 24px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
 .container {
   max-width: 1200px;
   margin: 0 auto;
@@ -372,6 +389,10 @@ h4 {
   border-style: solid;
 }
 
+.border-glass-border {
+  border-color: var(--glass-border);
+}
+
 .border-transparent {
   border-color: transparent;
 }
@@ -412,4 +433,30 @@ h4 {
 
 .duration-300 {
   transition-duration: 300ms;
+}
+
+.bg-bg-color {
+  background-color: var(--bg-color);
+}
+
+.verified-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+  padding: 0.25rem 0.75rem;
+  border-radius: 99px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  margin-bottom: 1.5rem;
+}
+
+.unclear-highlight {
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+  border-bottom: 2px dashed #f59e0b;
+  padding: 0 2px;
+  cursor: help;
 }
