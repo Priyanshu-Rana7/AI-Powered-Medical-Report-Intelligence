@@ -1,0 +1,20 @@
+{
+    "app_name": "MedClare",
+    "hero_title": "Understand your Medical Reports in Seconds",
+    "hero_subtitle": "Upload your complex medical results and get a personalized, empathetic, and simplified explanation tailored for you.",
+    "start_analysis": "Start Analysis",
+    "analyzing": "Analyzing...",
+    "translating": "Translating...",
+    "verified_badge": "Clinically Verified by Dual-AI Pass",
+    "language_label": "Language:",
+    "download_analysis": "Download Analysis",
+    "analyze_another": "Analyze another report",
+    "features": {
+        "empathetic": "Empathetic AI",
+        "empathetic_desc": "We explain findings like a caring doctor would, with context and care.",
+        "secure": "Private & Secure",
+        "secure_desc": "Your data is processed securely and never stored on our servers.",
+        "jargon": "Smart Jargon Removal",
+        "jargon_desc": "Complex terms are automatically translated into everyday language."
+    }
+}
