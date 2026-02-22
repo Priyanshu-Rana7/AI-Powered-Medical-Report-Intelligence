@@ -28,6 +28,11 @@ frontend/.vite/
 .DS_Store
 Thumbs.db
 
+# Databases
+*.db
+*.sqlite
+*.sqlite3
+
 # Build artifacts
 build_error.log
 coverage/
